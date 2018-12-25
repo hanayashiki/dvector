@@ -127,35 +127,51 @@ namespace dv
             return std::make_tuple((LeafType*)node, local_index);
         }
 
-        void erase(const size_t index) noexcept
+        void _group_empty(LeafType * node)
+        {
+            LeafType * brother;
+            while (node && node->p && (brother = node->get_brother()))
+            {
+                if (brother->count() > 0)
+                {
+                    _replace_node(brother, node->p);
+                    _rebalance(node->p, -1);
+                }
+                else
+                {
+                    this->destroy(brother);
+                }
+            }
+        }
+
+        void erase(dnode_base * root_node, const size_t index) noexcept
         {
             LeafType * leaf;
             size_t local_index;
 
             std::tie(leaf, local_index) = this->_access_node(root_node, index);
+            size_t local_len = leaf->count();
 
             if (local_index == 0)
             {
                 auto old_slice_right = this->leaf_construct(SliceType(1, local_len, leaf->value));
                 _replace_node(old_slice_right, leaf);
-                //_rebalance(p, 1); ##TODO##
+                this->destroy(leaf);
             }
-            else if (local_index == local_len)
+            else if (local_index == local_len - 1)
             {
-                p->set_left(leaf);
-                p->set_right(new_node);
-                p->renew_count();
-                _rebalance(p, 1);
+                auto old_slice_left = this->leaf_construct(SliceType(1, 0, leaf->value));
+                _replace_node(old_slice_left, leaf);
+                this->destroy(leaf);
             }
             else
             {
+                dnode * p = _build_parent(leaf);
                 auto old_slice_left = this->leaf_construct(SliceType(0, local_index, leaf->value));
-                auto old_slice_right = this->leaf_construct(SliceType(local_index, local_len, leaf->value));
+                auto old_slice_right = this->leaf_construct(SliceType(local_index + 1, local_len, leaf->value));
                 p->set_left(old_slice_left);
-                p->set_right(new_node);
+                p->set_right(old_slice_right);
                 _rebalance(p, 1);
-                // std::cout << "inserting again" << std::endl;
-                _insert_node(new_node, new_node->count(), old_slice_right); // Insert next to new_node
                 this->destroy(leaf); // Old leaf no longer there
             }
         }
@@ -213,7 +229,6 @@ namespace dv
             dnode * current = static_cast<dnode*>(subtree);
             char last_place = '\0';
             char current_place = '\0';
-            bool increase_height = true;
 
             // std::cout << "_rebalance loop starts" << std::endl;
             while (current != nullptr && current->p != nullptr)
@@ -229,16 +244,11 @@ namespace dv
                     current_place = 'r';
                 }
 
-                if (increase_height)
+                current->p->renew_height(current_place, height_change);
+                if (current->p->h == 0) // Can no longer affect more heights
                 {
-                    current->p->renew_height(current_place, height_change);
-                    if (current->p->h == 0) // Can no longer affect more heights
-                    {
-                        increase_height = false;
-                        break;
-                    }
+                    break;
                 }
-
 
                 // std::cout << "1. current->p->h == " << (int)current->p->h << std::endl;
                 // std::cout << visualize(this->root, false);
@@ -255,7 +265,7 @@ namespace dv
                     dnode * x = current;
                     int x_h = current->h;
                     dnode * y = current->p;
-                    if (last_place == 'l')
+                    if (current->h >= 0)
                     {
                         /* Right-Left
                                  y                                               y
@@ -328,7 +338,7 @@ namespace dv
                     int x_h = current->h;
                     dnode * y = current->p;
 
-                    if (last_place == 'r')
+                    if (current->h <= 0)
                     {
                         /* Left-Right
                              y                                               y

@@ -1,6 +1,7 @@
 #pragma once
 #include "dslice.h"
 #include "dnode_base.h"
+#include "dnode.h"
 
 namespace dv
 {
@@ -28,6 +29,27 @@ namespace dv
             return value.size();
         }
  
+        dleaf<T, Allocator> * get_brother()
+        {
+            if (p != nullptr)
+            {
+                auto ptr = static_cast<dnode*>(p);
+                if (p->is_left_child(this) && p->right->type == 'l')
+                {
+                    return p->right;
+                }
+                else if (p->is_right_child(this) && p->left->type == 'n')
+                {
+                    return p->left;
+                }
+                else
+                {
+                    return nullptr;
+                }
+            }
+            return nullptr;
+        }
+
         ValueType & operator==(const dleaf &) = delete;
 
         virtual ~dleaf() {}
