@@ -37,14 +37,7 @@ namespace dv
             return ptr;
         }
 
-        template<typename T>
-        void destory(T *)
-        {
-            throw std::exception("Not implemented destructor for T. ");
-        }
-
-        template<>
-        void destory<dnode_base>(dnode_base * n)
+        void destroy(dnode_base * n)
         {
             n->~dnode_base();
             NodeBaseAlloc().deallocate(n, 1);

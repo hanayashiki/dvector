@@ -6,6 +6,10 @@
 #include "dvector_base.h"
 #include <tuple>
 
+#ifndef DV_PROTECTED
+#define DV_PROTECTED protected
+#endif
+
 /* 
  *  dvector: logarithmic insert, index-access, deletion array 
  *     
@@ -72,13 +76,18 @@
 namespace dv
 {
     template<class T, class Allocator = std::allocator<T>>
-    class dvector : protected dvector_base<T, Allocator>
+    class dvector : DV_PROTECTED dvector_base<T, Allocator>
     {
     private:
         using Base = dvector_base<T, Allocator>;
         using Self = dvector<T, Allocator>;
         using Vector = Base::Vector;
         using LeafType = Base::LeafType;
+    DV_PROTECTED:
+        bool check_height()
+        {
+            return Base::check_height(this->root);
+        }
     public:
         dvector(const Vector & init_vector) : Base(init_vector) 
         {
@@ -86,6 +95,11 @@ namespace dv
 
         dvector(Vector && init_vector) : Base(std::move(init_vector))
         {
+        }
+
+        size_t size() const noexcept
+        {
+            return this->root->count();
         }
 
         const T & operator[] (const size_t index) const
@@ -97,9 +111,9 @@ namespace dv
             return l->value[local_index];
         }
 
-        std::string visualize()
+        std::string visualize(bool check = true)
         {
-            return Base::visualize();
+            return Base::visualize(this->root, check);
         }
 
         void insert(const size_t index, const Vector & elements)
