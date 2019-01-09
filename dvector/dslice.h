@@ -15,21 +15,31 @@ namespace dv
         _dslice_base(Vector && _base_vector)
             : base_vector(std::allocate_shared<Vector>(Allocator(), std::move(_base_vector)))
         {
+            //std::cout << "_dslice_base called on move" << std::endl;
+            //std::cout << "_dslice_base(): use_count == " << base_vector.use_count() << std::endl;
         }
 
         _dslice_base(const Vector & _base_vector)
             : base_vector(std::allocate_shared<Vector>(Allocator(), _base_vector))
         {
+            //std::cout << "_dslice_base called on copy" << std::endl;
         }
 
         _dslice_base(const std::shared_ptr<Vector> & _base_vector)
             : base_vector(_base_vector)
         {
+            //std::cout << "_dslice_base called on copy shared_ptr" << std::endl;
         }
 
         _dslice_base(std::shared_ptr<Vector> && _base_vector)
             : base_vector(std::move(_base_vector))
         {
+            //std::cout << "_dslice_base called on move shared_ptr" << std::endl;
+        }
+
+        ~_dslice_base()
+        {
+            //std::cout << "~_dslice_base(): use_count == " << base_vector.use_count() << std::endl;
         }
     };
 

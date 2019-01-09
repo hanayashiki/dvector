@@ -81,6 +81,9 @@ namespace dbgalloc
 
             *((size_t*)pMem) = size;
             
+            //std::cerr << "alloc_no == " << alloc_no << std::endl;
+            //std::cerr << "stop_no == " << stop_no << std::endl;
+
             if (alloc_no == stop_no)
             {
                 std::stringstream s;

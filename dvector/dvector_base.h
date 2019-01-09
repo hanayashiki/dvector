@@ -129,23 +129,38 @@ namespace dv
 
         void _group_empty(LeafType * node)
         {
-            LeafType * brother;
-            while (node && node->p && (brother = node->get_brother()))
+            dnode_base * brother;
+            if (node->count() == 0 && node->p)
             {
-                if (brother->count() > 0)
+                brother = node->get_brother();
+                if (brother == nullptr)
                 {
-                    _replace_node(brother, node->p);
-                    _rebalance(node->p, -1);
+                    std::cout << this->visualize(node, false) << std::endl;
+                    std::cout << this->visualize(node->p, false) << std::endl;
+                    throw std::exception();
                 }
-                else
-                {
-                    this->destroy(brother);
-                }
+                //std::cout << "visualizing group_empty" << std::endl;
+                //std::cout << this->visualize(node->p->p, false) << std::endl;
+                //std::cout << "===========================" << std::endl;
+                _replace_node(brother, node->p);
+                //std::cout << this->visualize(brother->p->p, false) << std::endl;
+                //std::cout << "===========================" << std::endl;
+                this->destroy(node->p);
+                this->destroy(node);
+                if (brother->p != nullptr)
+                    brother->p->renew_count();
+                _rebalance(brother, -1);
             }
         }
 
         void erase(dnode_base * root_node, const size_t index) noexcept
         {
+            /*
+                  
+            
+            
+             */
+            
             LeafType * leaf;
             size_t local_index;
 
@@ -154,14 +169,22 @@ namespace dv
 
             if (local_index == 0)
             {
-                auto old_slice_right = this->leaf_construct(SliceType(1, local_len, leaf->value));
+                auto old_slice_right = this->leaf_construct(SliceType(1, local_len, std::move(leaf->value)));
                 _replace_node(old_slice_right, leaf);
+                if (old_slice_right->p != nullptr)
+                    old_slice_right->p->renew_count();
+                _group_empty(old_slice_right);
+                //std::cout << "destroy leaf!" << std::endl;
                 this->destroy(leaf);
             }
             else if (local_index == local_len - 1)
             {
-                auto old_slice_left = this->leaf_construct(SliceType(1, 0, leaf->value));
+                auto old_slice_left = this->leaf_construct(SliceType(0, local_len - 1, std::move(leaf->value)));
                 _replace_node(old_slice_left, leaf);
+                if (old_slice_left->p != nullptr)
+                    old_slice_left->p->renew_count();
+                _group_empty(old_slice_left);
+                //std::cout << "destroy leaf!" << std::endl;
                 this->destroy(leaf);
             }
             else
@@ -171,6 +194,7 @@ namespace dv
                 auto old_slice_right = this->leaf_construct(SliceType(local_index + 1, local_len, leaf->value));
                 p->set_left(old_slice_left);
                 p->set_right(old_slice_right);
+                p->renew_count();
                 _rebalance(p, 1);
                 this->destroy(leaf); // Old leaf no longer there
             }
@@ -224,16 +248,16 @@ namespace dv
             }
         }
 
-        void _rebalance(dnode * subtree, int height_change)
+        void _rebalance(dnode_base * subtree, int height_change)
         {
             dnode * current = static_cast<dnode*>(subtree);
-            char last_place = '\0';
             char current_place = '\0';
 
             // std::cout << "_rebalance loop starts" << std::endl;
             while (current != nullptr && current->p != nullptr)
             {
-                DV_CHECKH(current)
+                if (current->type == 'n')
+                    DV_CHECKH(current)
 
                 if (current->p->is_left_child(current))
                 {
@@ -244,9 +268,24 @@ namespace dv
                     current_place = 'r';
                 }
 
+                int original_weight = current->p->h;
+
+                auto before = this->visualize(current->p, false);
+
+                //std::cout << "current_place: " << current_place << std::endl;
+                //std::cout << current->p->id << ": " << (int)current->p->h;
                 current->p->renew_height(current_place, height_change);
-                if (current->p->h == 0) // Can no longer affect more heights
+                //std::cout << " -> " << (int)current->p->h << std::endl;
+                auto after = this->visualize(current->p, false);
+
+                bool keep_height = 
+                    ((current->p->h == 0) && (height_change == 1)) ||
+                    ((original_weight == 0) && (height_change == -1));
+                                   
+
+                if (keep_height) // Can no longer affect more heights
                 {
+                    //std::cout << "stop rebalancing at " << current->p->id << std::endl;
                     break;
                 }
 
@@ -255,17 +294,20 @@ namespace dv
 
                 if (current->p->h == -2) 
                 {
+                    current = (dnode*)current->p->right;
                     /* Right-Right
                            y                          x
                           / \                       /   \
                          h   x             ->      y    h+1
                             / \                   / \
                       (h,h+1)  (h+1)             h  (h, h+1)
+
+                      original y_height = h + 2 --> current x_height = h + 2
                      */
                     dnode * x = current;
                     int x_h = current->h;
                     dnode * y = current->p;
-                    if (current->h >= 0)
+                    if (current->h > 0)
                     {
                         /* Right-Left
                                  y                                               y
@@ -322,10 +364,20 @@ namespace dv
                     // x_h = -1 -> x : (h, h+1) -> y : (h, h) -> y_h = 0; 
 
                     // std::cout << visualize(this->root);
-                    break;
+                    if (height_change > 0 || x_h == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        //std::cout << "current changes to: " << current->id << std::endl;
+                        continue;
+                    }
                 }
                 else if (current->p->h == 2)
                 {
+
+                    current = (dnode*)current->p->left;
                     /* Left-Left
                                    y                   x
                                   / \                 / \
@@ -338,7 +390,10 @@ namespace dv
                     int x_h = current->h;
                     dnode * y = current->p;
 
-                    if (current->h <= 0)
+                    //std::cout << "rotate x = " << x->id << std::endl;
+                    //std::cout << "rotate y = " << y->id << std::endl;
+
+                    if (current->h < 0)
                     {
                         /* Left-Right
                              y                                               y
@@ -403,7 +458,15 @@ namespace dv
                     current = static_cast<dnode*>(right_rotate(y));
 
                     // std::cout << visualize(this->root);
-                    break;
+                    if (height_change > 0 || x_h == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        //std::cout << "current changes to: " << current->id << std::endl;
+                        continue;
+                    }
                 }
                 else
                 {
@@ -412,9 +475,9 @@ namespace dv
                     assert((current->p->h <= 1) && (current->p->h >= -1));
                 }
                 
-
-                last_place = current_place;
                 current_place = '\0';
+                //if (current->p)
+                //    std::cout << "current: " << current->id << " -> " << current->p->id << std::endl;
                 current = current->p;
             }
         }
@@ -498,7 +561,7 @@ namespace dv
                 }
                 ss << std::endl;
             });
-            if (!check_height(node) && check)
+            if (check && !check_height(node))
             {
                 std::cout << ss.str();
                 assert(false);
@@ -507,18 +570,40 @@ namespace dv
         }
 
         static
-        bool check_height(dnode_base * base)
+        bool check_height(dnode_base * base, std::function<void()> callback = [](){})
         {
             bool good = true;
 
-            _post_order_traverse<int>(base, [&good](int lh, int rh, auto ptr)
+            _post_order_traverse<int>(base, [&good, &callback](int lh, int rh, auto ptr)
             {
                 if (ptr->type == 'l') return 0;
                 else
                 {
                     auto p = (dnode*)ptr;
-                    if (p->h != lh - rh) good = false;
-                    if (p->h >= 2 || p->h <= -2) good = false;
+                    if (p->h != lh - rh)
+                    {
+                        good = false;
+                        callback();
+
+                        //std::cerr << "Height not good (p->h != lh - rh). " << std::endl;
+                        //std::cerr << visualize(ptr->p->p, false);
+                        //std::cerr << "id: " << p->id << std::endl;
+                        //std::cerr << "p->h == " << (int)p->h << std::endl;
+                        //std::cerr << "lh - rh == " << (lh - rh) << std::endl;
+                        throw std::exception();
+                    }
+                    if (p->h >= 2 || p->h <= -2)
+                    {
+                        good = false;
+                        //std::cerr << "Not balanced. " << std::endl;
+                        throw std::exception();
+                    }
+                    if (p->p != nullptr && p->count() == 0)
+                    {
+                        good = false;
+                        //std::cerr << "Empty node found. " << std::endl;
+                        throw std::exception();
+                    }
                     return std::max(lh, rh) + 1;
                 }
             });

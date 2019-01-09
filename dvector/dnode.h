@@ -70,6 +70,6 @@ namespace dv
             }
         }
 
-        virtual ~dnode() {}
+        virtual ~dnode() { /*std::cout << "~dnode is called!!!";*/ }
     };
 }
