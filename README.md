@@ -47,12 +47,14 @@ deep♂fantasies
 + Based on [AVL tree](https://en.wikipedia.org/wiki/AVL_tree), to support effective insertion, deletion and indexing at random positions
 
 ## Usage
-
+1. Make sure standard c++17 is supported.
+2. Clone/download and copy the headers.
 ```
 git clone https://github.com/hanayashiki/dvector
 cd dvector/dvector
 cp *.h /your/target/directory/
 ```
+3. Follow the examples to get started.
 
 ## Methods
 
