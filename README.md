@@ -63,6 +63,11 @@ cp *.h /your/target/directory/
   dvector(); // Construct a dvector
   dvector(const Vector & init_vector); // Build the dvector from another std::vector of the same parameters
   dvector(Vector && init_vector); // Build the dvector from another std::vector of the same parameters
+  
+  dvector(const Self & other); // Copy constructor
+  Self & operator = (const Self & other); // Copy assignment
+  dvector(Self && other); // Move constructor
+  Self & operator = (Self && other); // Move assignment
   ```
 + Destructor = default
 + Insert, time complexity = O(log(N) + M), N = count of exisiting elements, M = count of inserted elements this time
