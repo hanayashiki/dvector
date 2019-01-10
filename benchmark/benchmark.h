@@ -106,7 +106,7 @@ namespace bm
             auto t1 = Clock::now();
             task();
             auto t2 = Clock::now();
-            return std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() * 1.0 / 10e6;
+            return std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() * 1.0 / 10e3;
         }
 
     };

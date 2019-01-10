@@ -116,6 +116,15 @@ namespace dv
             return l->value[local_index];
         }
 
+        T & operator[] (const size_t index)
+        {
+            LeafType * l;
+            size_t local_index;
+            std::tie(l, local_index) = Base::_access_node(Base::root, index);
+
+            return l->value[local_index];
+        }
+
         std::string visualize(bool check = true)
         {
             return Base::visualize(this->root, check);
@@ -143,6 +152,16 @@ namespace dv
         {
             assert(index <= this->size());
             Base::_insert_node(this->root, index, std::move(element));
+        }
+
+        void push_back(const T & element)
+        {
+            insert(this->size(), element);
+        }
+
+        void push_back(T && element)
+        {
+            insert(this->size(), std::move(element));
         }
 
         void erase(const size_t index)

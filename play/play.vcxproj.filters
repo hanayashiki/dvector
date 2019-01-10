@@ -18,26 +18,13 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="dvector.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="dnode.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="dslice.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="dnode_base.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="dleaf.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="dvector_base.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="dalloc.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="play.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
