@@ -50,7 +50,7 @@ deep♂fantasies
 1. Make sure standard c++17 is supported.
 2. Clone/download and copy the headers.
 ```
-git clone https://github.com/hanayashiki/dvector
+git clone https://github.com/hanayashiki/dvector.git
 cd dvector/dvector
 cp *.h /your/target/directory/
 ```
