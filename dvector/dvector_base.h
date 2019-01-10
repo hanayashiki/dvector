@@ -25,6 +25,10 @@ namespace dv
 
         dnode_base * root;
 
+        dvector_base() : root(nullptr)
+        {
+        }
+
         dvector_base(const Vector & init_vector)
         {
             root = this->leaf_construct(SliceType(0, init_vector.size(), init_vector));
@@ -33,6 +37,11 @@ namespace dv
         dvector_base(Vector && init_vector)
         {
             root = this->leaf_construct(SliceType(0, init_vector.size(), std::move(init_vector)));
+        }
+
+        void init_empty_root()
+        {
+            root = this->leaf_construct(SliceType(0, 0, Vector()));
         }
 
         void _replace_node(dnode_base * new_node, dnode_base * old_node)
@@ -84,6 +93,25 @@ namespace dv
             x->elem_count = x->left->count() + x->right->count();
             y->elem_count = x->elem_count + y->right->count();
             return y;
+        }
+
+        dnode_base * _deep_copy(dnode_base * node)
+        {
+            if (node->type == 'l')
+            {
+                return this->leaf_construct(*static_cast<LeafType*>(node));
+            }
+            else
+            {
+
+                dnode * copy_node = this->node_construct();
+                copy_node->set_left(_deep_copy(static_cast<dnode*>(node)->left));
+                copy_node->set_right(_deep_copy(static_cast<dnode*>(node)->right));
+                copy_node->elem_count = static_cast<dnode*>(node)->elem_count;
+                copy_node->h = static_cast<dnode*>(node)->h;
+
+                return copy_node;
+            }
         }
 
         dnode_base * right_rotate(dnode * y)

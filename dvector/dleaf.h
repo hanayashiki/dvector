@@ -10,6 +10,7 @@ namespace dv
     {
     public:
         using ValueType = dslice<T, Allocator>;
+        using LeafType = dleaf<T, Allocator>;
         ValueType value;
 
         explicit dleaf(const ValueType & value)
@@ -49,8 +50,6 @@ namespace dv
             }
             return nullptr;
         }
-
-        ValueType & operator==(const dleaf &) = delete;
 
         virtual ~dleaf() { /*std::cout << "~dleaf is called!!!";*/ }
     };

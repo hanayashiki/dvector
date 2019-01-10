@@ -102,6 +102,37 @@ namespace dv
         {
         }
 
+        dvector(const Self & other)
+        {
+            // std::cout << "Deep copy is called! " << std::endl;
+            this->root = Base::_deep_copy(other.root);
+        }
+
+        Self & operator = (const Self & other)
+        {
+            if (this != &other)
+            {
+                this->root = Base::_deep_copy(other.root);
+            }
+            return *this;
+        }
+
+        dvector(Self && other)
+        {
+            this->root = other.root;
+            other.init_empty_root();
+        }
+
+        Self & operator = (Self && other)
+        {
+            if (this != &other)
+            {
+                this->root = other.root;
+                other.init_empty_root();
+            }
+            return *this;
+        }
+
         size_t size() const noexcept
         {
             return this->root->count();

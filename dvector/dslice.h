@@ -10,6 +10,7 @@ namespace dv
     {
     protected:
         using Vector = std::vector<T, Allocator>;
+        using Self = _dslice_base<T, Allocator>;
         const std::shared_ptr<Vector> base_vector;
     public:
         _dslice_base(Vector && _base_vector)
@@ -35,6 +36,16 @@ namespace dv
             : base_vector(std::move(_base_vector))
         {
             //std::cout << "_dslice_base called on move shared_ptr" << std::endl;
+        }
+
+        _dslice_base(const Self & other)
+            : base_vector(std::allocate_shared<Vector>(Allocator(), other.get_base_vector()))
+        {
+        }
+
+        const Vector & get_base_vector() const
+        {
+            return *base_vector;
         }
 
         ~_dslice_base()
