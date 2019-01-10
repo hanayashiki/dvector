@@ -75,20 +75,25 @@
 
 namespace dv
 {
+
     template<class T, class Allocator = std::allocator<T>>
     class dvector : DV_PROTECTED dvector_base<T, Allocator>
     {
     private:
         using Base = dvector_base<T, Allocator>;
         using Self = dvector<T, Allocator>;
-        using Vector = Base::Vector;
-        using LeafType = Base::LeafType;
+        using Vector = typename Base::Vector;
+        using LeafType = typename Base::LeafType;
     DV_PROTECTED:
         bool check_height()
         {
             return Base::check_height(this->root);
         }
     public:
+        dvector() : Base(Vector{})
+        {
+        }
+
         dvector(const Vector & init_vector) : Base(init_vector) 
         {
         }
@@ -118,28 +123,33 @@ namespace dv
 
         void insert(const size_t index, const Vector & elements)
         {
+            assert(index <= this->size());
             Base::_insert_node(this->root, index, elements);
         }
 
         void insert(const size_t index, Vector && elements)
         {
+            assert(index <= this->size());
             Base::_insert_node(this->root, index, std::move(elements));
         }
 
         void insert(const size_t index, const T & element)
         {
-            Base::_insert_node(this->root, index, Vector{ element });
+            assert(index <= this->size());
+            Base::_insert_node(this->root, index, element);
         }
 
         void insert(const size_t index, T && element)
         {
-            {
-                Vector temp;
-                temp.push_back(std::move(element));
-                Base::_insert_node(this->root, index, std::move(temp));
-            }
+            assert(index <= this->size());
+            Base::_insert_node(this->root, index, std::move(element));
         }
 
+        void erase(const size_t index)
+        {
+            assert(index < this->size());
+            Base::_erase(this->root, index);
+        }
 
     };
 }

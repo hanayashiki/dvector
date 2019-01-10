@@ -49,38 +49,79 @@ namespace dv
     private:
         using Self = dslice<T, Allocator>;
         using Base = _dslice_base<T, Allocator>;
-        const size_t start;
-        const size_t end;
+        using iterator = typename Base::Vector::iterator;
+        using const_iterator = typename Base::Vector::const_iterator;
+
+        size_t _start;
+        size_t _end;
     public:
         template<class... InitArgs>
         dslice(const size_t start, const size_t end, InitArgs&&... args) : 
             Base(std::forward<InitArgs>(args)...),
-            start(start), end(end)
+            _start(start), _end(end)
         {
         }
 
         const T & operator[] (const size_t index) const
         {
-            assert(start + index < end);
-            return (*Base::base_vector)[start + index];
+            assert(_start + index < end);
+            return (*Base::base_vector)[_start + index];
         }
 
-        dslice slice(const size_t _start, const size_t _end) const
+        dslice slice(const size_t __start, const size_t __end) const
         {
             assert(_start <= _end);
             assert(_end - _start <= size());
-            return Self(start + _start, start + _end, Base::base_vector);
+            return Self(_start + __start, _start + __end, Base::base_vector);
         }
 
         T & operator[] (const size_t index)
         {
-            assert(start + index < end);
-            return (*Base::base_vector)[start + index];
+            assert(_start + index < _end);
+            return (*Base::base_vector)[_start + index];
         }
 
         const size_t size() const noexcept
         {
-            return end - start;
+            return _end - _start;
+        }
+
+        bool can_push_back()
+        {
+            //std::cout << "_end == " << _end << std::endl;
+            return _end == (Base::base_vector->size());
+        }
+
+        void push_back(T && element) // Should be checked before can_push_back
+        {
+            Base::base_vector->push_back(std::move(element));
+            _end += 1;
+        }
+
+        void push_back(const T & element) // Should be checked before can_push_back
+        {
+            Base::base_vector->push_back(element);
+            _end += 1;
+        }
+
+        iterator begin()
+        {
+            return Base::base_vector->begin() + _start;
+        }
+
+        const_iterator begin() const
+        {
+            return Base::base_vector->begin() + _start;
+        }
+
+        iterator end()
+        {
+            return Base::base_vector->begin() + _end;
+        }
+
+        const_iterator end() const
+        {
+            return Base::base_vector->begin() + _end;
         }
     };
 }

@@ -153,7 +153,7 @@ namespace dv
             }
         }
 
-        void erase(dnode_base * root_node, const size_t index) noexcept
+        void _erase(dnode_base * root_node, const size_t index) noexcept
         {
             /*
                   
@@ -202,15 +202,81 @@ namespace dv
 
         void _insert_node(dnode_base * root_node, const size_t index, const Vector & elements)
         {
-            _insert_node(root_node, index, this->leaf_construct(SliceType(0, elements.size(), elements)));
+            auto new_node_builder = [&](LeafType* leaf)
+            {
+                if (leaf == nullptr)
+                {
+                    return this->leaf_construct(SliceType(0, elements.size(), elements));
+                }
+                else
+                {
+                    for (const auto & e : elements)
+                    {
+                        leaf->value.push_back(e);
+                    }
+                    return leaf;
+                }
+            };
+            _insert_node(root_node, index, new_node_builder);
         }
 
         void _insert_node(dnode_base * root_node, const size_t index, Vector && elements)
         {
-            _insert_node(root_node, index, this->leaf_construct(SliceType(0, elements.size(), std::move(elements))));
+            auto new_node_builder = [&](LeafType* leaf)
+            {
+                if (leaf == nullptr)
+                {
+                    return this->leaf_construct(SliceType(0, elements.size(), std::move(elements)));
+                }
+                else
+                {
+                    for (auto & e : elements)
+                    {
+                        leaf->value.push_back(std::move(e));
+                    }
+                    return leaf;
+                }
+            };
+            _insert_node(root_node, index, new_node_builder);
         }
 
-        void _insert_node(dnode_base * root_node, const size_t index, LeafType * new_node)
+        void _insert_node(dnode_base * root_node, const size_t index, const T & element)
+        {
+            auto new_node_builder = [&](LeafType* leaf)
+            {
+                if (leaf == nullptr)
+                {
+                    return this->leaf_construct(SliceType(0, 1, Vector { element }));
+                }
+                else
+                {
+                    leaf->value.push_back(element);
+                    return leaf;
+                }
+            };
+            _insert_node(root_node, index, new_node_builder);
+        }
+
+        void _insert_node(dnode_base * root_node, const size_t index, T && element)
+        {
+            auto new_node_builder = [&](LeafType* leaf)
+            {
+                if (leaf == nullptr)
+                {
+                    return this->leaf_construct(SliceType(0, 1, Vector { element }));
+                }
+                else
+                {
+                    leaf->value.push_back(std::move(element));
+                    return leaf;
+                }
+            };
+            _insert_node(root_node, index, new_node_builder);
+        }
+
+        void _insert_node(dnode_base * root_node, const size_t index, 
+            const std::function<LeafType*(LeafType*)> & new_node_builder, 
+            LeafType * force_new_leaf = nullptr)
         {
             LeafType * leaf;
             size_t local_index;
@@ -219,31 +285,47 @@ namespace dv
             // Find insertion place
 
             size_t local_len = leaf->count();
-            dnode * p = _build_parent(leaf);
 
-            if (local_index == 0)
+            //std::cout << "local_len = " << local_len << std::endl;
+
+            if (local_index == local_len)
             {
+                if (!leaf->value.can_push_back() || force_new_leaf)
+                {
+                    LeafType* new_node = force_new_leaf ? force_new_leaf : new_node_builder(nullptr);
+                    dnode * p = _build_parent(leaf);
+                    p->set_left(leaf);
+                    p->set_right(new_node);
+                    p->renew_count();
+                    _rebalance(p, 1);
+                }
+                else
+                {
+                    leaf = new_node_builder(leaf);
+                    if (leaf->p != nullptr)
+                        leaf->p->renew_count();
+                }
+            }
+            else if (local_index == 0)
+            {
+                LeafType* new_node = new_node_builder(nullptr);
+                dnode * p = _build_parent(leaf);
                 p->set_left(new_node);
                 p->set_right(leaf);
                 p->renew_count();
                 _rebalance(p, 1);
             }
-            else if (local_index == local_len)
-            {
-                p->set_left(leaf);
-                p->set_right(new_node);
-                p->renew_count();
-                _rebalance(p, 1);
-            }
             else
             {
+                LeafType* new_node = new_node_builder(nullptr);
+                dnode * p = _build_parent(leaf);
                 auto old_slice_left = this->leaf_construct(SliceType(0, local_index, leaf->value));
                 auto old_slice_right = this->leaf_construct(SliceType(local_index, local_len, leaf->value));
                 p->set_left(old_slice_left);
                 p->set_right(new_node);
                 _rebalance(p, 1);
                 // std::cout << "inserting again" << std::endl;
-                _insert_node(new_node, new_node->count(), old_slice_right); // Insert next to new_node
+                _insert_node(new_node, new_node->count(), [](auto) { return nullptr; }, old_slice_right); // Insert next to new_node
                 this->destroy(leaf); // Old leaf no longer there
             }
         }
@@ -530,6 +612,35 @@ namespace dv
             }
         }
 
+        template<bool ss_stringifiable>
+        static std::string element_to_str(const T & e);
+
+        template<>
+        static std::string element_to_str<true>(const T & e)
+        {
+            std::stringstream ss;
+            ss << e;
+            return ss.str();
+        }
+
+        template<>
+        static std::string element_to_str<false>(const T & e)
+        {
+            return "<element>";
+        }
+
+        template<class...> using void_t = void;
+
+        template<class, class = void>
+        struct is_ostreamable : std::false_type {};
+
+        template<class T>
+        struct is_ostreamable<T, void_t<decltype(std::declval<std::ostream&>() <<
+            std::declval<T>())>> : std::true_type {};
+
+        template<typename ElementType>
+        inline static constexpr bool is_ostreamable_v = is_ostreamable<ElementType>::value;
+
         static
         std::string visualize(dnode_base * node, bool check = true)
         {
@@ -550,7 +661,7 @@ namespace dv
                     ss << "[";
                     for (size_t i = 0; i < static_cast<LeafType*>(ptr)->value.size(); i++)
                     {
-                        ss << static_cast<LeafType*>(ptr)->value[i];
+                        ss << element_to_str<is_ostreamable_v<T>>(static_cast<LeafType*>(ptr)->value[i]);
                         if (i != static_cast<LeafType*>(ptr)->value.size() - 1)
                         {
                             ss << ", ";

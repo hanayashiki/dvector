@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dvector", "dvector\dvector.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{5672DA23-B37B-422C-AA62-30ABEFE4876C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "benchmark", "benchmark\benchmark.vcxproj", "{05074620-AF1F-45BF-992C-C24E95387C63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{5672DA23-B37B-422C-AA62-30ABEFE4876C}.Release|x64.Build.0 = Release|x64
 		{5672DA23-B37B-422C-AA62-30ABEFE4876C}.Release|x86.ActiveCfg = Release|Win32
 		{5672DA23-B37B-422C-AA62-30ABEFE4876C}.Release|x86.Build.0 = Release|Win32
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Debug|x64.ActiveCfg = Debug|x64
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Debug|x64.Build.0 = Debug|x64
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Debug|x86.ActiveCfg = Debug|Win32
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Debug|x86.Build.0 = Debug|Win32
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Release|x64.ActiveCfg = Release|x64
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Release|x64.Build.0 = Release|x64
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Release|x86.ActiveCfg = Release|Win32
+		{05074620-AF1F-45BF-992C-C24E95387C63}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,7 +26,7 @@ namespace dbgalloc
             alloc_no = 0;
         }
 
-        ~Dbg()
+        ~Dbg() noexcept(false)
         {
             alloc_no = 0;
             if (ptr_to_no.size() != 0)
@@ -38,6 +38,7 @@ namespace dbgalloc
                 {
                     std::cerr << "[" << p.second << "] : ##TODO: MORE INFO##" << std::endl;
                 }
+                throw std::exception();
             }
         }
     };
