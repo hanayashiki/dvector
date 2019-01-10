@@ -352,13 +352,13 @@ namespace dv
 
                 int original_weight = current->p->h;
 
-                auto before = this->visualize(current->p, false);
+                //auto before = this->visualize(current->p, false);
 
                 //std::cout << "current_place: " << current_place << std::endl;
                 //std::cout << current->p->id << ": " << (int)current->p->h;
                 current->p->renew_height(current_place, height_change);
                 //std::cout << " -> " << (int)current->p->h << std::endl;
-                auto after = this->visualize(current->p, false);
+                //auto after = this->visualize(current->p, false);
 
                 bool keep_height = 
                     ((current->p->h == 0) && (height_change == 1)) ||

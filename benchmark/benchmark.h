@@ -65,6 +65,7 @@ namespace bm
 
             for (const auto & task : tasks)
             {
+                bool skip = false;
                 for (const auto & name : filter)
                 {
                     if (name == task_names[index])
@@ -72,11 +73,17 @@ namespace bm
                         result.ran.push_back(false);
                         result.avg.push_back(0);
                         result.best.push_back(0);
+                        skip = true;
+                        break;
                     }
                 }
+                if (skip) continue;
+
+                result.ran.push_back(true);
                 std::vector<double> repeat_times;
                 for (int i = 0; i < repeat; i++)
                 {
+                    // std::cout << task_names[index] << " repeat: " << i << std::endl;
                     repeat_times.push_back(run_task(task));
                 }
 
@@ -99,7 +106,7 @@ namespace bm
             auto t1 = Clock::now();
             task();
             auto t2 = Clock::now();
-            return std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() * 1.0 / 10e9;
+            return std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() * 1.0 / 10e6;
         }
 
     };
