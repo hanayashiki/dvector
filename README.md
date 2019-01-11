@@ -116,7 +116,7 @@ cp *.h /your/target/directory/
   The range of index will be checked with `assert`.
 
 + Iterator
-  + dvector::iterator, dvector::const_iterator implements [RandomAccessIterator](http://www.cplusplus.com/reference/iterator/RandomAccessIterator/)
+  + `dvector::iterator` and `dvector::const_iterator` implement [RandomAccessIterator](http://www.cplusplus.com/reference/iterator/RandomAccessIterator/)
   + About time complexity, `O(N)` to loop through the container sequentially, at worse `O(log(N))` and best `O(1)` to do `iter + n` calculation. 
   + Looping through the container sequentially once means visiting every node of the underlying AVL-tree, because AVL-tree is nearly perfectly balanced, the count of total nodes is proportional to the count of the leaves.
   + If you want to loop through the container, it is obvious that using a [range-based for loop](https://docs.microsoft.com/en-us/cpp/cpp/range-based-for-statement-cpp?view=vs-2017) is much more efficient and easier than `for (int i = 0; i < N; i++)`. The iterator do not visit from the underlying AVL-tree's root but searches from the bottom, which is closer to the data.
