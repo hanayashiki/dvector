@@ -34,12 +34,30 @@ int main()
 
     std::cout << the_dvector[0] << "♂" << the_dvector[1] << std::endl;
     // deep♂fantasies
+
+    for (const auto & e : the_dvector) // Supports iterator, therefore range-based for loop is enabled
+    {
+        std::cout << e << " ";
+    }
+    std::cout << std::endl;
+    // deep fantasies
+
+    dv::dvector<std::string> yet_another_dvector(the_dvector); // Move, Copy constructible and assignable
+
+    for (const auto & e : yet_another_dvector)
+    {
+        std::cout << e << " ";
+    }
+    std::cout << std::endl;
+    // deep fantasies
 }
 ```
 Output:
 ```
 deep♂dark♂fantasies
 deep♂fantasies
+deep fantasies
+deep fantasies
 ```
 
 + Header-only library, simply `#include "../dvector/dvector.h"` is sufficient to use it
@@ -56,7 +74,7 @@ cp *.h /your/target/directory/
 ```
 3. Follow the examples to get started.
 
-## Methods
+## Members
 
 + Constructors
   ```cpp
@@ -96,6 +114,19 @@ cp *.h /your/target/directory/
   T & operator[] (const size_t index);
   ```
   The range of index will be checked with `assert`.
+
++ Iterator
+  + dvector::iterator, dvector::const_iterator implements [RandomAccessIterator](http://www.cplusplus.com/reference/iterator/RandomAccessIterator/)
+  + About time complexity, `O(N)` to loop through the container sequentially, at worse `O(log(N))` and best `O(1)` to do `iter + n` calculation. 
+  + Looping through the container sequentially once means visiting every node of the underlying AVL-tree, because AVL-tree is nearly perfectly balanced, the count of total nodes is proportional to the count of the leaves.
+  ```cpp
+  iterator begin(); // Creates an iterator that points to the start of the elements, O(log(N))
+  iterator end(); // Creates an iterator that points to the end of the elements, O(1)
+  const_iterator begin() const; // Below are const iterators
+  const_iterator end() const;
+  const_iterator cbegin();
+  const_iterator cend();
+  ```
   
 ## Benchmarks
 
