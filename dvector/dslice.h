@@ -39,7 +39,7 @@ namespace dv
         }
 
         _dslice_base(const Self & other)
-            : base_vector(std::allocate_shared<Vector>(Allocator(), other.get_base_vector()))
+            : base_vector(other.base_vector)
         {
         }
 
@@ -71,6 +71,13 @@ namespace dv
             Base(std::forward<InitArgs>(args)...),
             _start(start), _end(end)
         {
+        }
+
+        dslice(const dslice & other) :
+            Base(*(other.base_vector)),
+            _start(other._start), _end(other._end)
+        {
+            //std::cout << "dslice copy is called" << std::endl;
         }
 
         const T & operator[] (const size_t index) const

@@ -27,7 +27,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Utility</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -155,11 +155,13 @@
   <ItemGroup>
     <ClInclude Include="dalloc.h" />
     <ClInclude Include="dleaf.h" />
+    <ClInclude Include="dmarcos.h" />
     <ClInclude Include="dnode.h" />
     <ClInclude Include="dnode_base.h" />
     <ClInclude Include="dslice.h" />
     <ClInclude Include="dvector.h" />
     <ClInclude Include="dvector_base.h" />
+    <ClInclude Include="dvector_iterator.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

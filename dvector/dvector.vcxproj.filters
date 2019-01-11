@@ -39,5 +39,11 @@
     <ClInclude Include="dalloc.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="dvector_iterator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dmarcos.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

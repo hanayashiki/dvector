@@ -133,8 +133,9 @@ namespace dv
             return x;
         }
 
+        static
         std::tuple<LeafType*, size_t>
-        _access_node(dnode_base * node, const size_t index) const
+        _access_node(const dnode_base * node, const size_t index)
         {
             // std::cout << "node->count() == " << node->count() << std::endl;
             assert(index <= node->count()); // tail + 1 also legal here
@@ -197,7 +198,7 @@ namespace dv
 
             if (local_index == 0)
             {
-                auto old_slice_right = this->leaf_construct(SliceType(1, local_len, std::move(leaf->value)));
+                auto old_slice_right = this->leaf_construct(leaf->value.slice(1, local_len));
                 _replace_node(old_slice_right, leaf);
                 if (old_slice_right->p != nullptr)
                     old_slice_right->p->renew_count();
@@ -207,7 +208,7 @@ namespace dv
             }
             else if (local_index == local_len - 1)
             {
-                auto old_slice_left = this->leaf_construct(SliceType(0, local_len - 1, std::move(leaf->value)));
+                auto old_slice_left = this->leaf_construct(leaf->value.slice(0, local_len - 1));
                 _replace_node(old_slice_left, leaf);
                 if (old_slice_left->p != nullptr)
                     old_slice_left->p->renew_count();
@@ -218,8 +219,8 @@ namespace dv
             else
             {
                 dnode * p = _build_parent(leaf);
-                auto old_slice_left = this->leaf_construct(SliceType(0, local_index, leaf->value));
-                auto old_slice_right = this->leaf_construct(SliceType(local_index + 1, local_len, leaf->value));
+                auto old_slice_left = this->leaf_construct(leaf->value.slice(0, local_index));
+                auto old_slice_right = this->leaf_construct(leaf->value.slice(local_index + 1, local_len));
                 p->set_left(old_slice_left);
                 p->set_right(old_slice_right);
                 p->renew_count();
@@ -347,8 +348,8 @@ namespace dv
             {
                 LeafType* new_node = new_node_builder(nullptr);
                 dnode * p = _build_parent(leaf);
-                auto old_slice_left = this->leaf_construct(SliceType(0, local_index, leaf->value));
-                auto old_slice_right = this->leaf_construct(SliceType(local_index, local_len, leaf->value));
+                auto old_slice_left = this->leaf_construct(leaf->value.slice(0, local_index));
+                auto old_slice_right = this->leaf_construct(leaf->value.slice(local_index, local_len));
                 p->set_left(old_slice_left);
                 p->set_right(new_node);
                 _rebalance(p, 1);

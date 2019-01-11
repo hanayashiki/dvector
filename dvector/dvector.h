@@ -6,9 +6,8 @@
 #include "dvector_base.h"
 #include <tuple>
 
-#ifndef DV_PROTECTED
-#define DV_PROTECTED protected
-#endif
+#include "dvector_iterator.h"
+#include "dmarcos.h"
 
 /* 
  *  dvector: logarithmic insert, index-access, deletion array 
@@ -90,6 +89,29 @@ namespace dv
             return Base::check_height(this->root);
         }
     public:
+        using iterator = dvector_iterator<T, Allocator>;
+        using const_iterator = const iterator;
+    private:
+        iterator _get_begin_iterator() const
+        {
+            if (this->size() > 0)
+            {
+                LeafType * left_most;
+                size_t local_index;
+                std::tie(left_most, local_index) = Base::_access_node(Base::root, 0);
+                return iterator(left_most, Base::root, 0, 0);
+            }
+            else
+            {
+                return _get_end_iterator();
+            }
+        }
+
+        iterator _get_end_iterator() const
+        {
+            return iterator(nullptr, Base::root, 0, this->size());
+        }
+    public:
         dvector() : Base(Vector{})
         {
         }
@@ -106,6 +128,11 @@ namespace dv
         {
             // std::cout << "Deep copy is called! " << std::endl;
             this->root = Base::_deep_copy(other.root);
+        }
+
+        dvector(std::initializer_list<T> i)
+            : Base(Vector(i))
+        {
         }
 
         Self & operator = (const Self & other)
@@ -201,5 +228,34 @@ namespace dv
             Base::_erase(this->root, index);
         }
 
+        iterator begin()
+        {
+            return _get_begin_iterator();
+        }
+
+        iterator end()
+        {
+            return _get_end_iterator();
+        }
+
+        const_iterator begin() const
+        {
+            return _get_begin_iterator();
+        }
+
+        const_iterator end() const
+        {
+            return _get_end_iterator();
+        }
+
+        const_iterator cbegin()
+        {
+            return _get_begin_iterator();
+        }
+
+        const_iterator cend()
+        {
+            return _get_end_iterator();
+        }
     };
 }
