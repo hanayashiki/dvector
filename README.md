@@ -2,6 +2,17 @@
 
 Effective array-like data structure supporting logarithmic indexing, insertion and deletion.
 
+## Introduction
+
+There are many effective data structures that provide us with efficient ways to insert, look up, and delete. Like hashtable, Red-black tree, AVL-tree and skiplist for key-value look-up. But they cannot support indexing. Consider if you are maintaining a **sequence**, where random deletion and insertion is very frequent, but the order of the sequence still matters to you.
+
+```
+seq = "abcdefghijk..."
+```
+You want to delete and visit elements by their current indices. If you use key-value data structures, and use keys for indices and values for elements, sorry, if you delete any element in the middle, the keys of the following items must be updated, costing `O(N)` time complexity. If you use `std::vector` or basic arrays, deleting also forces following items to move, costing `O(N)`. It seems to be a need for a new data structure to support us with some dynamic indexing feature.
+
+So I came up with an idea to implement `dvector` based on AVL-tree to avoid the `O(N)` cost. Each element will be associated with a leaf-node in an AVL-tree, and the inner nodes with store the counts of their leaf-nodes. If the tree is modified, only at most `TreeHeight` counts will be updated. To keep `TreeHeight(N) ~ O(log(N))`, we use a similar rebalancing algorithm in `AVL-tree`, so indexing, insertion and deletion will only take `O(log(N))` time complexity.
+
 ## Features
 Example:
 ```cpp
@@ -36,12 +47,14 @@ deep♂fantasies
 + Based on [AVL tree](https://en.wikipedia.org/wiki/AVL_tree), to support effective insertion, deletion and indexing at random positions
 
 ## Usage
-
+1. Make sure standard c++17 is supported.
+2. Clone/download and copy the headers.
 ```
-git clone https://github.com/hanayashiki/dvector
+git clone https://github.com/hanayashiki/dvector.git
 cd dvector/dvector
 cp *.h /your/target/directory/
 ```
+3. Follow the examples to get started.
 
 ## Methods
 
@@ -50,6 +63,11 @@ cp *.h /your/target/directory/
   dvector(); // Construct a dvector
   dvector(const Vector & init_vector); // Build the dvector from another std::vector of the same parameters
   dvector(Vector && init_vector); // Build the dvector from another std::vector of the same parameters
+  
+  dvector(const Self & other); // Copy constructor
+  Self & operator = (const Self & other); // Copy assignment
+  dvector(Self && other); // Move constructor
+  Self & operator = (Self && other); // Move assignment
   ```
 + Destructor = default
 + Insert, time complexity = O(log(N) + M), N = count of exisiting elements, M = count of inserted elements this time
